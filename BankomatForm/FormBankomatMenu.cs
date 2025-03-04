@@ -198,62 +198,56 @@ namespace BankomatForm
         private void btnOk_Click(object sender, EventArgs e)
         {
             double amount;
-            switch (currentOperation)
+            if (double.TryParse(labelAmountEnter.Text, out amount) && amount > 0)
             {
-                case OperationType.Deposit:
-                    if (double.TryParse(labelAmountEnter.Text, out amount))
-                    {
-                        activeBankomat.PutMoney(currentAccount, amount);
-                        panelPutMoney.Visible = true;
-                        labelPutMoney.Text = labelAmountEnter.Text + " грн";
-                        HidePanel();
-                    }
-                    else
-                    {
-                        ShowErrorMessage("Некоректна сума для поповнення.");
-                    }
-                    currentOperation = OperationType.None;
-                    break;
-
-                case OperationType.Withdraw:
-                    if (double.TryParse(labelAmountEnter.Text, out amount))
-                    {
-                        if (activeBankomat.WithDrawMoney(currentAccount, amount))
-                        {
-                            panelWithDraw.Visible = true;
-                        }
-                    }
-                    else
-                    {
-                        ShowErrorMessage("Некоректна сума для зняття.");
-                    }
-                    currentOperation = OperationType.None;
-                    break;
-
-                case OperationType.Transfer:
-                    panelEnterCardNumber.Visible = false;
-                    panelEnterAmount.Visible = true;
-                    amountEnter = true;
-
-                    if (double.TryParse(labelAmountEnter.Text, out amount) && amount > 0)
-                    {
-                        currentBank.TransferFunds(currentAccount.CardNumber, labelCardEnter.Text, amount);
-                        panelStart.Visible = true;
-                        currentOperation = OperationType.None;
-                    }
-                    else
-                    {
-                        ShowErrorMessage("Некоректна сума для переведення.");
-                    }
-                    break;
-
-                case OperationType.None:
-                    HidePanel();
-                    panelStart.Visible = true;
-                    break;
+                switch (currentOperation)
+                {
+                    case OperationType.Deposit:
+                        HandleDeposit(amount);
+                        break;
+                    case OperationType.Withdraw:
+                        HandleWithdraw(amount);
+                        break;
+                    case OperationType.Transfer:
+                        HandleTransfer(amount);
+                        break;
+                    default:
+                        ShowErrorMessage("Некоректна операція.");
+                        break;
+                }
+            }
+            else
+            {
+                ShowErrorMessage("Некоректна сума.");
             }
         }
 
+        private void HandleDeposit(double amount)
+        {
+            activeBankomat.PutMoney(currentAccount, amount);
+            panelPutMoney.Visible = true;
+            labelPutMoney.Text = labelAmountEnter.Text + " грн";
+            HidePanel();
+        }
+
+        private void HandleWithdraw(double amount)
+        {
+            if (activeBankomat.WithDrawMoney(currentAccount, amount))
+            {
+                panelWithDraw.Visible = true;
+            }
+        }
+
+        private void HandleTransfer(double amount)
+        {
+            panelEnterCardNumber.Visible = false;
+            panelEnterAmount.Visible = true;
+            amountEnter = true;
+
+            currentBank.TransferFunds(currentAccount.CardNumber, labelCardEnter.Text, amount);
+            panelStart.Visible = true;
+            currentOperation = OperationType.None;
+        }
         private void ShowErrorMessage(string message)
         {
             MessageBox.Show(message, "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
