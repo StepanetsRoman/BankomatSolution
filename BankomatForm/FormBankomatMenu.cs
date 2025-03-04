@@ -10,7 +10,14 @@ namespace BankomatForm
         private Account currentAccount;
         private AutomatedTellerMachine activeBankomat;
         private bool amountEnter = false;
-        private int indexOperation = 0;
+        public enum OperationType
+        {
+            None,
+            Deposit,
+            Withdraw,
+            Transfer
+        }
+        private OperationType currentOperation = OperationType.None;
 
         public FormBankomatMenu(Bank bank, Account account, AutomatedTellerMachine bankomat)
         {
@@ -168,7 +175,7 @@ namespace BankomatForm
         {
             HidePanel();
             panelEnterAmount.Visible = true;
-            indexOperation = 1;
+            currentOperation = OperationType.Deposit;
             amountEnter = true;
         }
 
@@ -176,7 +183,7 @@ namespace BankomatForm
         {
             HidePanel();
             panelEnterAmount.Visible = true;
-            indexOperation = 2;
+            currentOperation = OperationType.Withdraw;
             amountEnter = true;
         }
 
@@ -184,16 +191,16 @@ namespace BankomatForm
         {
             HidePanel();
             panelEnterCardNumber.Visible = true;
-            indexOperation = 3;
+            currentOperation = OperationType.Transfer;
             amountEnter = false;
         }
 
         private void btnOk_Click(object sender, EventArgs e)
         {
             double amount;
-            switch (indexOperation)
+            switch (currentOperation)
             {
-                case 1:
+                case OperationType.Deposit:
                     if (double.TryParse(labelAmountEnter.Text, out amount))
                     {
                         activeBankomat.PutMoney(currentAccount, amount);
@@ -205,10 +212,10 @@ namespace BankomatForm
                     {
                         ShowErrorMessage("Некоректна сума для поповнення.");
                     }
-                    indexOperation = 0;
+                    currentOperation = OperationType.None;
                     break;
 
-                case 2:
+                case OperationType.Withdraw:
                     if (double.TryParse(labelAmountEnter.Text, out amount))
                     {
                         if (activeBankomat.WithDrawMoney(currentAccount, amount))
@@ -220,10 +227,10 @@ namespace BankomatForm
                     {
                         ShowErrorMessage("Некоректна сума для зняття.");
                     }
-                    indexOperation = 0;
+                    currentOperation = OperationType.None;
                     break;
 
-                case 3:
+                case OperationType.Transfer:
                     panelEnterCardNumber.Visible = false;
                     panelEnterAmount.Visible = true;
                     amountEnter = true;
@@ -232,7 +239,7 @@ namespace BankomatForm
                     {
                         currentBank.TransferFunds(currentAccount.CardNumber, labelCardEnter.Text, amount);
                         panelStart.Visible = true;
-                        indexOperation = 0;
+                        currentOperation = OperationType.None;
                     }
                     else
                     {
@@ -240,7 +247,7 @@ namespace BankomatForm
                     }
                     break;
 
-                case 0:
+                case OperationType.None:
                     HidePanel();
                     panelStart.Visible = true;
                     break;
