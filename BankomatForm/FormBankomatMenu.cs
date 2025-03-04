@@ -40,7 +40,11 @@ namespace BankomatForm
             labelAmountEnter.Text = "";
             labelCardEnter.Text = "";
         }
-
+        private void SwitchPanel(Panel panelToShow)
+        {
+            HidePanel();
+            panelToShow.Visible = true;
+        }
         private void btnNum1_Click(object sender, EventArgs e)
         {
             if (amountEnter)
@@ -173,24 +177,21 @@ namespace BankomatForm
 
         private void btnPutMoney_Click(object sender, EventArgs e)
         {
-            HidePanel();
-            panelEnterAmount.Visible = true;
+            SwitchPanel(panelEnterAmount);
             currentOperation = OperationType.Deposit;
             amountEnter = true;
         }
 
         private void btnWithDraw_Click(object sender, EventArgs e)
         {
-            HidePanel();
-            panelEnterAmount.Visible = true;
+            SwitchPanel(panelEnterAmount);
             currentOperation = OperationType.Withdraw;
             amountEnter = true;
         }
 
         private void btnTransfer_Click(object sender, EventArgs e)
         {
-            HidePanel();
-            panelEnterCardNumber.Visible = true;
+            SwitchPanel(panelEnterCardNumber);
             currentOperation = OperationType.Transfer;
             amountEnter = false;
         }
@@ -225,16 +226,15 @@ namespace BankomatForm
         private void HandleDeposit(double amount)
         {
             activeBankomat.PutMoney(currentAccount, amount);
-            panelPutMoney.Visible = true;
+            SwitchPanel(panelPutMoney);
             labelPutMoney.Text = labelAmountEnter.Text + " грн";
-            HidePanel();
         }
 
         private void HandleWithdraw(double amount)
         {
             if (activeBankomat.WithDrawMoney(currentAccount, amount))
             {
-                panelWithDraw.Visible = true;
+                SwitchPanel(panelWithDraw);
             }
         }
 
@@ -245,9 +245,9 @@ namespace BankomatForm
             amountEnter = true;
 
             currentBank.TransferFunds(currentAccount.CardNumber, labelCardEnter.Text, amount);
-            panelStart.Visible = true;
-            currentOperation = OperationType.None;
+            SwitchPanel(panelStart);
         }
+
         private void ShowErrorMessage(string message)
         {
             MessageBox.Show(message, "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
